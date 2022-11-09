@@ -2,3 +2,7 @@ numpy
 pandas
 requests
 transformers
+matplotlib
+torch
+torchvision
+scikit-learn
