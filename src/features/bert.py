@@ -1,30 +1,40 @@
+import csv
 import os
 from pathlib import Path
 import typing as t
 
-from matplotlib import pyplot as plt
-import numpy as np
-import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, EarlyStoppingCallback
+from transformers import (
+    AutoTokenizer,
+    AutoModelForSequenceClassification,
+    EarlyStoppingCallback,
+    Trainer,
+    TrainingArguments,
+)
+from scipy.special import softmax
 from sklearn.model_selection import train_test_split
 
-from utils import data
-from utils.data import Dataset
-from utils.metrics import Evaluate
-from utils.pathtools import project
+from src.utils.constants import *
+from src.utils.datasets import Dataset
+from src.utils.logging import logger
+from src.utils.pathtools import project
 
+
+# Setting up tokenizer parallism
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 class BertClassifier4Entailment(object):
 
     def __init__(
         self,
-        sentences_1: t.List[str],
-        sentences_2: t.List[str],
-        labels: t.List[int],
+        train_sentences_1: t.List[str],
+        train_sentences_2: t.List[str],
+        train_labels: t.List[int],
+        submission_sentences_1: t.List[str],
+        submission_sentences_2: t.List[str],
         *,
         output_dir: Path = project.get_new_bert_chepoint(),
         model_name: str = 'bert-base-multilingual-cased',
-        test_size: float = 0.03,
+        test_size: float = TEST_SIZE,
         checkpoint: t.Optional[Path] = None,
     ) -> None:
         """Initiates an instance of BertEncoder.
@@ -32,6 +42,9 @@ class BertClassifier4Entailment(object):
         TO BE COMPLETED
         """
 
+        logger.debug('Initiating a BERT classifier...')
+
+        # Train and test sets
         (
             self.train_sentences_1,
             self.test_sentences_1,
@@ -40,20 +53,34 @@ class BertClassifier4Entailment(object):
             self.train_labels,
             self.test_labels,
         ) = train_test_split(
-            sentences_1,
-            sentences_2,
-            labels,
+            train_sentences_1,
+            train_sentences_2,
+            train_labels,
             test_size = test_size
         )
 
+        # Full train set
+        self.full_train_sentences_1 = train_sentences_1
+        self.full_train_sentences_2 = train_sentences_2
+
+        # Submission set
+        self.submission_sentences_1 = submission_sentences_1
+        self.submission_sentences_2 = submission_sentences_2
+
         self.model_name = model_name
         self.output_dir = output_dir
-        self.tokenizer = tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_fast = True)
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name, num_labels = 3)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_fast = True)
+        self.model = AutoModelForSequenceClassification.from_pretrained(
+            self.model_name,
+            num_labels = NUM_LABELS
+        )
 
         if checkpoint is not None:
+            logger.info('Found an existing trained model')
             self.model = AutoModelForSequenceClassification.from_pretrained(checkpoint)
-            print(f'Successfully loaded model from {checkpoint}')
+            logger.info(f'Successfully loaded model from {checkpoint}')
+        else:
+            logger.info('No existing trained model specified')
 
         self.train_size = len(self.train_labels)
         self.test_size = len(self.test_labels)
@@ -66,12 +93,13 @@ class BertClassifier4Entailment(object):
         TO BE COMPLETED
         """
         # Train set
+        logger.info('Tokenizing train set...')
         self.train_tokenized = self.tokenizer(
             self.train_sentences_1,
             self.train_sentences_2,
             padding=True,
             truncation=True,
-            max_length=512,
+            max_length=BERT_MAX_LENGTH,
         )
         self.train_dataset = Dataset(
             self.train_tokenized,
@@ -79,44 +107,76 @@ class BertClassifier4Entailment(object):
         )
 
         # Test set
+        logger.info('Tokenizing test set...')
         self.test_tokenized = self.tokenizer(
             self.test_sentences_1,
             self.test_sentences_2,
             padding=True,
             truncation=True,
-            max_length=512,
+            max_length=BERT_MAX_LENGTH,
         )
         self.test_dataset = Dataset(
             self.test_tokenized,
             self.test_labels,
         )
 
+        # Test set
+        logger.info('Tokenizing submission set...')
+        self.submission_tokenized = self.tokenizer(
+            self.submission_sentences_1,
+            self.submission_sentences_2,
+            padding=True,
+            truncation=True,
+            max_length=BERT_MAX_LENGTH,
+        )
+        self.submission_dataset = Dataset(
+            self.submission_tokenized,
+            # No label
+        )
+
+        # Test set
+        logger.info('Tokenizing full train set...')
+        self.full_train_tokenized = self.tokenizer(
+            self.full_train_sentences_1,
+            self.full_train_sentences_2,
+            padding=True,
+            truncation=True,
+            max_length=BERT_MAX_LENGTH,
+        )
+        self.full_train_dataset = Dataset(
+            self.full_train_tokenized,
+            # No label
+        )
+
+        logger.info('Datasets built !')
         self._datasets_built = True
 
     def build_trainer(self):
         if not self._datasets_built:
             self.tokenize()
 
+        logger.info('Building BERT trainer...')
+
         self.args = TrainingArguments(
             # Output
             output_dir=self.output_dir,
             overwrite_output_dir = False,
             # Evaluation
-            evaluation_strategy="epoch",
+            evaluation_strategy=BERT_EVALUATION_STRATEGY,
             # Saving
-            save_strategy="epoch",
-            save_total_limit=5,
+            save_strategy=BERT_SAVE_STRATEGY,
+            save_total_limit=BERT_TOTAL_SAVE_LIMIT,
             # Batches
-            per_device_train_batch_size=8,
-            per_device_eval_batch_size=8,
-            gradient_accumulation_steps=1,
+            per_device_train_batch_size=BERT_PER_DEVICE_TRAIN_BATCH_SIZE,
+            per_device_eval_batch_size=BERT_PER_DEVICE_EVAL_BATCH_SIZE,
+            gradient_accumulation_steps=BERT_GRADIENT_ACCUMULATION_STEPS,
             # Training
-            num_train_epochs=20,
-            warmup_steps=100,
+            num_train_epochs=BERT_NUM_TRAIN_EPOCHS,
+            warmup_steps=BERT_WARMUM_STEPS,
             # Best model
             load_best_model_at_end=True,
-            metric_for_best_model='eval_accuracy',
-            greater_is_better=True,
+            metric_for_best_model=BERT_METRIC_FOR_BEST_MODEL,
+            greater_is_better=BERT_GREATER_IS_BETTER,
         )
 
         self.callback = EarlyStoppingCallback(
@@ -128,26 +188,52 @@ class BertClassifier4Entailment(object):
             args=self.args,
             train_dataset=self.train_dataset,
             eval_dataset=self.test_dataset,
-            compute_metrics=Evaluate.compute_metrics,
+            compute_metrics=Dataset.compute_metrics,
             callbacks=[self.callback]
         )
 
+        logger.info('Trainer built !')
         self._trainer_built = True
 
     def train(self):
         if not self._trainer_built:
             self.build_trainer()
 
+        logger.info(f'Starting training of the BERT classifier ({BERT_NUM_TRAIN_EPOCHS} epochs)')
         self.trainer.train()
+        logger.info('Training: done !')
         self.trainer.save_model(self.output_dir / 'best')
+        logger.info(f'Best model stored at {self.output_dir / "best"}')
 
-    
+    def predict(self):
+        if not self._datasets_built:
+            self.tokenize()
+
+        full_train_raw_pred, _, _ = self.trainer.predict(self.full_train_dataset)
+        full_train_y = softmax(full_train_raw_pred, axis=1)
+        with open(project.get_new_feature_file(BERT_FEATURE_NAME, FULL_TRAIN_FEAETURE_TYPE), 'w') as f:
+            csv_out = csv.writer(f)
+            csv_out.writerow([DATA_ID, DATA_LABEL])
+            for id, row in enumerate(full_train_y):
+                csv_out.writerow([id, row[1]])
+
+        submission_raw_pred, _, _ = self.trainer.predict(self.submission_dataset)
+        submission_y = softmax(submission_raw_pred, axis=1)
+        with open(project.get_new_feature_file(BERT_FEATURE_NAME, SUBMISSION_FEAETURE_TYPE), 'w') as f:
+            csv_out = csv.writer(f)
+            csv_out.writerow([DATA_ID, DATA_LABEL])
+            for id, row in enumerate(submission_y):
+                csv_out.writerow([id, row[1]])
+
 
 if __name__ == '__main__':
     classifier = BertClassifier4Entailment(
-        list(data.real.train.premise.values),
-        list(data.real.train.hypothesis.values),
-        list(data.real.train.label.values),
-        checkpoint=project.get_newest_bert_checkpoint()
+        train_sentences_1=list(project.train[DATA_PREMISE].values),
+        train_sentences_2=list(project.train[DATA_HYPOTHESIS].values),
+        train_labels=list(project.train[DATA_LABEL].values),
+        submission_sentences_1=list(project.test[DATA_PREMISE].values),
+        submission_sentences_2=list(project.test[DATA_HYPOTHESIS].values),
+        checkpoint=project.get_latest_bert_checkpoint(),
     )
     classifier.train()
+    classifier.predict()

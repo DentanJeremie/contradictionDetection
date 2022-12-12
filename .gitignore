@@ -1,5 +1,5 @@
 # Customized
-.DS_Store
+*.DS_Store
 .vscode
 
 # Byte-compiled / optimized / DLL files
