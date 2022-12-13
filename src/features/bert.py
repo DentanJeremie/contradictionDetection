@@ -46,7 +46,12 @@ class BertClassifier4Entailment(object):
 
         logger.debug('Initiating a BERT classifier...')
 
-        # Train and test sets
+        # Full train set
+        self.full_train_sentences_1 = train_sentences_1
+        self.full_train_sentences_2 = train_sentences_2
+        self.full_train_labels = train_labels
+
+        # Partial train and test sets
         (
             self.train_sentences_1,
             self.test_sentences_1,
@@ -61,15 +66,11 @@ class BertClassifier4Entailment(object):
             test_size = test_size
         )
 
-        # Full train set
-        self.full_train_sentences_1 = train_sentences_1
-        self.full_train_sentences_2 = train_sentences_2
-        self.full_train_labels = train_labels
-
         # Submission set
         self.submission_sentences_1 = submission_sentences_1
         self.submission_sentences_2 = submission_sentences_2
 
+        # Models
         self.model_name = model_name
         self.output_dir = output_dir
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_fast = True)
@@ -263,7 +264,7 @@ class BertClassifier4Entailment(object):
         full_train_y = softmax(full_train_raw_pred, axis=1)
         with open(project.get_new_feature_file(BERT_FEATURE_NAME, FULL_TRAIN_FEAETURE_TYPE), 'w') as f:
             csv_out = csv.writer(f)
-            csv_out.writerow([DATA_ID, DATA_LABEL])
+            csv_out.writerow([DATA_ID, BERT_FEATURE_NAME])
             for id, row in enumerate(full_train_y):
                 csv_out.writerow([id, row[1]])
 
@@ -274,14 +275,13 @@ class BertClassifier4Entailment(object):
         submission_y = softmax(submission_raw_pred, axis=1)
         with open(project.get_new_feature_file(BERT_FEATURE_NAME, SUBMISSION_FEAETURE_TYPE), 'w') as f:
             csv_out = csv.writer(f)
-            csv_out.writerow([DATA_ID, DATA_LABEL])
+            csv_out.writerow([DATA_ID, BERT_FEATURE_NAME])
             for id, row in enumerate(submission_y):
                 csv_out.writerow([id, row[1]])
 
         logger.info('Predictions: done!')
 
-
-if __name__ == '__main__':
+def main():
     classifier = BertClassifier4Entailment(
         train_sentences_1=list(project.train[DATA_PREMISE].values),
         train_sentences_2=list(project.train[DATA_HYPOTHESIS].values),
@@ -292,3 +292,6 @@ if __name__ == '__main__':
     )
     classifier.train()
     classifier.predict()
+
+if __name__ == '__main__':
+    main()

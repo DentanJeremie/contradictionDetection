@@ -114,7 +114,7 @@ class CustomizedPath():
             with open(target_path, 'wb') as opt:
                 opt.write(response.content)
 
-    def as_pandas(
+    def data_as_pandas(
         self,
         name: str,
         *,
@@ -132,19 +132,19 @@ class CustomizedPath():
     @property
     def train(self) -> pd.DataFrame:
         if self._train is None:
-            self._train = self.as_pandas("train")
+            self._train = self.data_as_pandas("train")
         return self._train
 
     @property
     def test(self) -> pd.DataFrame:
         if self._test is None:
-            self._test = self.as_pandas("test")
+            self._test = self.data_as_pandas("test")
         return self._test
 
     @property
     def sample(self) -> pd.DataFrame:
         if self._sample is None:
-            self._sample = self.as_pandas("sample")
+            self._sample = self.data_as_pandas("sample")
 
 # ------------------ LOGS ------------------
 
@@ -201,9 +201,23 @@ class CustomizedPath():
         return self.mkdir_if_not_exists(self.output / 'features')
 
     def get_feature_folder(self, feature_name):
+        """Returns the feature folder for a given class of feature.
+        Ex of class of feature: `'bert'`
+
+        :param feature_name: The class of feature
+        :returns: The path to the folder
+        """
         return self.mkdir_if_not_exists(self.features / feature_name)
 
     def get_new_feature_file(self, feature_name: str, feature_type: str):
+        """Returns a new feature file for a given class and a given type of feature.
+        Ex of class of feature: `'bert'`
+        Ex of type of feature: `'full_train'`
+
+        :param feature_name: The class of feature
+        :param feature_type: The type of feature
+        :returns: The path to the new file
+        """
         parent_folder = self.get_feature_folder(feature_name)
         result = parent_folder / f'{feature_type}_{feature_name}_{datetime.datetime.now().strftime("features_%Y_%m%d__%H_%M_%S")}.csv'
         with result.open('w') as f:
@@ -211,6 +225,14 @@ class CustomizedPath():
         return result
 
     def get_latest_features(self, feature_name: str, feature_type: str):
+        """Returns the latest feature file for a given class and a given type of feature.
+        Ex of class of feature: `'bert'`
+        Ex of type of feature: `'full_train'`
+
+        :param feature_name: The class of feature
+        :param feature_type: The type of feature
+        :returns: The path to the feature file
+        """
         parent_folder = self.get_feature_folder(feature_name)
         files = sorted([
             str(path)
@@ -222,5 +244,31 @@ class CustomizedPath():
         if len(files) == 0:
             return None
         return Path(files[-1])
+
+# ------------------ XGBOOST ------------------
+
+    @property
+    def xgboost_folder(self):
+        return self.mkdir_if_not_exists(self.output / 'xgboost')
+    
+    @property
+    def xgboost_parameters(self):
+        return self.xgboost_folder / 'params.json'
+
+# ------------------ SUBMISSIONS ------------------
+
+    @property
+    def submission_folder(self):
+        return self.mkdir_if_not_exists(self.output / 'submissions')
+    
+    def get_new_submission_file(self):
+        """Returns a new submission file.
+
+        :returns: The path to the new file
+        """
+        result = self.submission_folder / f'submission_{datetime.datetime.now().strftime("features_%Y_%m%d__%H_%M_%S")}.csv'
+        with result.open('w') as f:
+            pass
+        return result
 
 project = CustomizedPath() 
