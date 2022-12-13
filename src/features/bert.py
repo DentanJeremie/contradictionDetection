@@ -24,6 +24,8 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 class BertClassifier4Entailment(object):
 
+# ------------------ INIT ------------------
+
     def __init__(
         self,
         train_sentences_1: t.List[str],
@@ -62,6 +64,7 @@ class BertClassifier4Entailment(object):
         # Full train set
         self.full_train_sentences_1 = train_sentences_1
         self.full_train_sentences_2 = train_sentences_2
+        self.full_train_labels = train_labels
 
         # Submission set
         self.submission_sentences_1 = submission_sentences_1
@@ -88,9 +91,17 @@ class BertClassifier4Entailment(object):
         self._datasets_built = False
         self._trainer_built = False
 
+# ------------------ TOKENIZATION ------------------
+
     def tokenize(self):
         """
-        TO BE COMPLETED
+        Tokenizes the train, test and sumission sets.
+        The following variables are initiated:
+
+        * `self.train_dataset: Dataset`
+        * `self.test_dataset: Dataset`
+        * `self.submission_tokenized: Dataset`
+        * `self.full_train_dataset: Dataset`
         """
         # Train set
         logger.info('Tokenizing train set...')
@@ -134,7 +145,7 @@ class BertClassifier4Entailment(object):
             # No label
         )
 
-        # Test set
+        # Full train set
         logger.info('Tokenizing full train set...')
         self.full_train_tokenized = self.tokenizer(
             self.full_train_sentences_1,
@@ -145,13 +156,19 @@ class BertClassifier4Entailment(object):
         )
         self.full_train_dataset = Dataset(
             self.full_train_tokenized,
-            # No label
+            self.full_train_labels,
         )
 
         logger.info('Datasets built !')
         self._datasets_built = True
 
+# ------------------ BUILDING TRAINER ------------------
+
     def build_trainer(self):
+        """
+        Builds the BERT trainer.
+        The hyperparameters are defines in `src.utils.constants`
+        """
         if not self._datasets_built:
             self.tokenize()
 
@@ -195,20 +212,53 @@ class BertClassifier4Entailment(object):
         logger.info('Trainer built !')
         self._trainer_built = True
 
+# ------------------ TRAIN ------------------
+
+    def train_logging(self):
+        epoch_metrics = {}
+        for info_dict in self.trainer.state.log_history:
+            if 'eval_accuracy' in info_dict:
+                epoch_metrics[info_dict['epoch']] = {
+                    'eval_loss': info_dict['eval_loss'],
+                    'eval_accuracy': info_dict['eval_accuracy'],
+                    'eval_precision': info_dict['eval_precision'],
+                    'eval_recall': info_dict['eval_recall'],
+                    'eval_f1': info_dict['eval_f1'],
+                }
+            if 'train_runtime' in info_dict:
+                train_metrics = {
+                    'train_runtime': info_dict['train_runtime'],
+                    'train_samples_per_second': info_dict['train_samples_per_second'],
+                }
+        for epoch in sorted(epoch_metrics):
+            for metric in sorted(epoch_metrics[epoch]):
+                logger.info(f'Epoch {epoch}: {metric}: {epoch_metrics[epoch][metric]:.3f}')
+        for metric in sorted(train_metrics):
+            logger.info(f'Training metrics: {metric}: {train_metrics[metric]:.3f}')
+
     def train(self):
         if not self._trainer_built:
             self.build_trainer()
 
         logger.info(f'Starting training of the BERT classifier ({BERT_NUM_TRAIN_EPOCHS} epochs)')
         self.trainer.train()
+        self.train_logging()
         logger.info('Training: done !')
         self.trainer.save_model(self.output_dir / 'best')
         logger.info(f'Best model stored at {self.output_dir / "best"}')
 
+# ------------------ PREDICT ------------------
+
+    def predict_logging(self, full_train_y, full_train_labels):
+        prediction_metrics = Dataset.compute_metrics((full_train_y, full_train_labels))
+        for metric in prediction_metrics:
+            logger.info(f'Full training preds.: {metric}: {prediction_metrics[metric]:.3f}')
+        
     def predict(self):
         if not self._datasets_built:
             self.tokenize()
 
+        logger.info('Predicting features for the full train set...')
         full_train_raw_pred, _, _ = self.trainer.predict(self.full_train_dataset)
         full_train_y = softmax(full_train_raw_pred, axis=1)
         with open(project.get_new_feature_file(BERT_FEATURE_NAME, FULL_TRAIN_FEAETURE_TYPE), 'w') as f:
@@ -217,6 +267,9 @@ class BertClassifier4Entailment(object):
             for id, row in enumerate(full_train_y):
                 csv_out.writerow([id, row[1]])
 
+        self.predict_logging(full_train_y, self.full_train_labels)
+
+        logger.info('Predicting features for the sumission set...')
         submission_raw_pred, _, _ = self.trainer.predict(self.submission_dataset)
         submission_y = softmax(submission_raw_pred, axis=1)
         with open(project.get_new_feature_file(BERT_FEATURE_NAME, SUBMISSION_FEAETURE_TYPE), 'w') as f:
@@ -224,6 +277,8 @@ class BertClassifier4Entailment(object):
             csv_out.writerow([DATA_ID, DATA_LABEL])
             for id, row in enumerate(submission_y):
                 csv_out.writerow([id, row[1]])
+
+        logger.info('Predictions: done!')
 
 
 if __name__ == '__main__':

@@ -3,8 +3,7 @@ import sys
 
 from src.utils.pathtools import project
 
-
-logger = logging.getLogger('root')
+logger = logging.root
 logFormatter = logging.Formatter('{relativeCreated:12.0f}ms {levelname:5s} [{filename}] {message:s}', style='{')
 logger.setLevel(logging.DEBUG)
 

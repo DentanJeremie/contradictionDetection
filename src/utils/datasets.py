@@ -4,8 +4,11 @@ import numpy as np
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
 import torch
 
+from src.utils.logging import logger
+
 
 class Dataset(torch.utils.data.Dataset):
+
     def __init__(self, encodings, labels=None):
         self.encodings = encodings
         self.labels = labels
@@ -37,4 +40,5 @@ class Dataset(torch.utils.data.Dataset):
         precision = precision_score(y_true=labels, y_pred=pred, average='weighted', zero_division=0.0)
         f1 = f1_score(y_true=labels, y_pred=pred, average='weighted', zero_division=0.0)
 
-        return {"accuracy": accuracy, "precision": precision, "recall": recall, "f1": f1}
+        result = {"accuracy": accuracy, "precision": precision, "recall": recall, "f1": f1}
+        return result

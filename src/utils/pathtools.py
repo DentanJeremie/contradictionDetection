@@ -60,13 +60,19 @@ class CustomizedPath():
             path = Path(path)
         return Path(CustomizedPath.remove_prefix(path.as_posix(), self.root.as_posix()))
 
-    def mkdir_if_not_exists(self, path: Path) -> Path:
+    def mkdir_if_not_exists(self, path: Path, gitignore: bool=False) -> Path:
         """Makes the directory if it does not exists
 
         :param path: The input path
+        :param gitignore: A boolean indicating if a gitignore must be included for the content of the directory
         :returns: The same path
         """
         path.mkdir(parents=True, exist_ok = True)
+
+        if gitignore:
+            with (path / '.gitignore').open('w') as f:
+                f.write('*\n!.gitignore')
+
         return path
 
 # ------------------ MAIN FOLDERS ------------------
@@ -77,15 +83,15 @@ class CustomizedPath():
 
     @property
     def data(self):
-        return self.mkdir_if_not_exists(self.root / 'data')
+        return self.mkdir_if_not_exists(self.root / 'data', gitignore=True)
 
     @property
     def output(self):
-        return self.mkdir_if_not_exists(self.root / 'output')
+        return self.mkdir_if_not_exists(self.root / 'output', gitignore=True)
 
     @property
     def logs(self):
-        return self.mkdir_if_not_exists(self.root / 'logs')
+        return self.mkdir_if_not_exists(self.root / 'logs', gitignore=True)
 
 # ------------------ DOWNLOADS ------------------
 
