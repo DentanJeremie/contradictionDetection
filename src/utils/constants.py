@@ -9,9 +9,16 @@ DATA_ID = 'id'
 # Features
 SUBMISSION_FEAETURE_TYPE = 'submission'
 FULL_TRAIN_FEAETURE_TYPE = 'full_train'
-FEATURE_NAMES = ['bert', 'cosine']
+FEATURE_NAMES = ['bert', 'cosine-distiluse-base', 'cosine-paraphrase-MiniLM', 
+                'cosine-paraphrase-mpnet', 'antonyms-distiluse-base', 
+                'antonyms-paraphrase-MiniLM', 'antonyms-paraphrase-mpnet']
 BERT_FEATURE_NAME = 'bert'
 COSINE_FEATURE_NAME = 'cosine'
+ANTONYM_FEATURE_NAME = 'antonyms'
+
+DISTILUSE_SUBFEATURE_NAME = 'distiluse-base'
+MINILM_SUBFEATURE_NAME = 'paraphrase-MiniLM'
+MPNET_SUBFEATURE_NAME = 'paraphrase-mpnet'
 
 # BERT config
 BERT_EVALUATION_STRATEGY = "epoch"

@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
-import xgboost
+import xgboost # /!\ if same name as this file it will throw an error
 
 from src.utils.constants import *
 from src.utils.logging import logger
@@ -36,14 +36,16 @@ class FinalClassifier(object):
         logger.info('Loading high-level features')
         for feature in self.feature_names:
             logger.debug(f'Loading features for {feature}...')
+
             full_train_features[feature] = pd.read_csv(
                 project.get_latest_features(feature, FULL_TRAIN_FEAETURE_TYPE),
                 low_memory=False,
-            ).drop('id', axis=1)
+            ).drop(DATA_ID, axis=1)
+
             submission_features[feature] = pd.read_csv(
                 project.get_latest_features(feature, SUBMISSION_FEAETURE_TYPE),
                 low_memory=False,
-            ).drop('id', axis=1)
+            ).drop(DATA_ID, axis=1)
 
         # Concatenating
         logger.info('Concatenating loaded high-level features')
@@ -152,9 +154,16 @@ class FinalClassifier(object):
 
         destination = project.get_new_submission_file()
         with destination.open('w') as f:
-            csv_out = csv.writer(f)
+            csv_out = csv.writer(f, lineterminator='\n')
             csv_out.writerow(['id','label'])
             for i, row in enumerate(submission_predictions):
                 csv_out.writerow([i, row])
 
         logger.info(f'Submission stored at {project.as_relative(destination)}')
+
+def main():
+    final_xgboost = FinalClassifier()
+    final_xgboost.predict()
+
+if __name__ == '__main__':
+    main()

@@ -108,8 +108,18 @@ class BertClassifier4Entailment(object):
         * `self.submission_tokenized: Dataset`
         * `self.full_train_dataset: Dataset`
         """
+
+        # Source : https://huggingface.co/docs/transformers/glossary#input-ids :
+        # The tokenizer takes care of splitting the sequences into tokens 
+        # available in the tokenizer library. The tokens are either words or subwords.
+        # The tokens are then coverted unto IDs which are understandable by the model.
+        # The tokenizer returns a dictionary with all the arguments necessary for its
+        # corresponding model to work properly. The token indices are under the key
+        # input_ids.
+        
         # Train set
         logger.info('Tokenizing train set...')
+
         self.train_tokenized = self.tokenizer(
             self.train_sentences_1,
             self.train_sentences_2,
@@ -269,8 +279,8 @@ class BertClassifier4Entailment(object):
         # to belong to class 0, 1 or 2
         full_train_y = softmax(full_train_raw_pred, axis=1) 
         with open(project.get_new_feature_file(BERT_FEATURE_NAME, FULL_TRAIN_FEAETURE_TYPE), 'w') as f:
-            csv_out = csv.writer(f)
-            csv_out.writerow([DATA_ID, BERT_FEATURE_NAME])
+            csv_out = csv.writer(f, lineterminator='\n')
+            csv_out.writerow([DATA_ID, BERT_FEATURE_NAME+"-0", BERT_FEATURE_NAME+"-1", BERT_FEATURE_NAME+"-2"])
             for id, row in enumerate(full_train_y):
                 csv_out.writerow([id, row[0], row[1], row[2]])
 
@@ -280,8 +290,8 @@ class BertClassifier4Entailment(object):
         submission_raw_pred, _, _ = self.trainer.predict(self.submission_dataset)
         submission_y = softmax(submission_raw_pred, axis=1)
         with open(project.get_new_feature_file(BERT_FEATURE_NAME, SUBMISSION_FEAETURE_TYPE), 'w') as f:
-            csv_out = csv.writer(f)
-            csv_out.writerow([DATA_ID, BERT_FEATURE_NAME])
+            csv_out = csv.writer(f, lineterminator='\n')
+            csv_out.writerow([DATA_ID, BERT_FEATURE_NAME+"-0", BERT_FEATURE_NAME+"-1", BERT_FEATURE_NAME+"-2"])
             for id, row in enumerate(submission_y):
                 csv_out.writerow([id, row[0], row[1], row[2]])
 
