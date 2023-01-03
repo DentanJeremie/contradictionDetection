@@ -127,7 +127,7 @@ class CustomizedPath():
         :returns: The pandas DataFrame corresponding to the asked file.
         """
         self.check_downloaded(name, force_reload = force_reload)
-        return pd.read_csv(project.data / self.files[name]['save_as'], low_memory=False)
+        return pd.read_csv(project.data / self.files[name]['save_as'], low_memory=False, sep=",")
 
     @property
     def train(self) -> pd.DataFrame:

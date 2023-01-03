@@ -1,4 +1,5 @@
 import csv
+import logging
 import os
 from pathlib import Path
 import typing as t
@@ -18,6 +19,7 @@ from src.utils.datasets import Dataset
 from src.utils.logging import logger
 from src.utils.pathtools import project
 
+logger.setLevel(logging.DEBUG)
 
 # Setting up tokenizer parallism
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -47,7 +49,9 @@ class BertClassifier4Entailment(object):
         logger.debug('Initiating a BERT classifier...')
 
         # Full train set
+        #   List of premise sentences in full train set
         self.full_train_sentences_1 = train_sentences_1
+        #   List of hypothesis sentences in full train set
         self.full_train_sentences_2 = train_sentences_2
         self.full_train_labels = train_labels
 
@@ -96,7 +100,7 @@ class BertClassifier4Entailment(object):
 
     def tokenize(self):
         """
-        Tokenizes the train, test and sumission sets.
+        Tokenizes the train, test and submission sets.
         The following variables are initiated:
 
         * `self.train_dataset: Dataset`
@@ -261,23 +265,25 @@ class BertClassifier4Entailment(object):
 
         logger.info('Predicting features for the full train set...')
         full_train_raw_pred, _, _ = self.trainer.predict(self.full_train_dataset)
-        full_train_y = softmax(full_train_raw_pred, axis=1)
+        # array of size (n_full_train,3) : each column gives the probability of the train sample 
+        # to belong to class 0, 1 or 2
+        full_train_y = softmax(full_train_raw_pred, axis=1) 
         with open(project.get_new_feature_file(BERT_FEATURE_NAME, FULL_TRAIN_FEAETURE_TYPE), 'w') as f:
             csv_out = csv.writer(f)
             csv_out.writerow([DATA_ID, BERT_FEATURE_NAME])
             for id, row in enumerate(full_train_y):
-                csv_out.writerow([id, row[1]])
+                csv_out.writerow([id, row[0], row[1], row[2]])
 
         self.predict_logging(full_train_y, self.full_train_labels)
 
-        logger.info('Predicting features for the sumission set...')
+        logger.info('Predicting features for the submission set...')
         submission_raw_pred, _, _ = self.trainer.predict(self.submission_dataset)
         submission_y = softmax(submission_raw_pred, axis=1)
         with open(project.get_new_feature_file(BERT_FEATURE_NAME, SUBMISSION_FEAETURE_TYPE), 'w') as f:
             csv_out = csv.writer(f)
             csv_out.writerow([DATA_ID, BERT_FEATURE_NAME])
             for id, row in enumerate(submission_y):
-                csv_out.writerow([id, row[1]])
+                csv_out.writerow([id, row[0], row[1], row[2]])
 
         logger.info('Predictions: done!')
 
