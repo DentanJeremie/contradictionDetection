@@ -3,6 +3,7 @@ pandas
 requests
 transformers
 matplotlib
+sentencepiece
 torch
 torchvision
 scikit-learn
