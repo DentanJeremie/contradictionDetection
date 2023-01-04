@@ -24,7 +24,7 @@ class FinalClassifier(object):
         self.init_classifier()
 
         logger.info('All features have been loaded, the classifier is initialized.')
-
+    
     def load_features(self):
         """Loads the features to the classifier.
         """
@@ -142,11 +142,16 @@ class FinalClassifier(object):
             logger.info(f'XGBoost evaluation: {metric}: {evaluation_results[metric]}')
 
     def predict(self, eval_first = True):
+        """Makes the final prediction
+        """
         if not self._trained:
             self.train()
 
         if eval_first:
             self.eval()
+
+        # Loading the pair labels
+        test_ids = project.test[DATA_ID].values
 
         logger.info('Computing predictions for the submission')
         submission_predictions = self.trained_model.predict(self.dsubmission)
@@ -156,7 +161,7 @@ class FinalClassifier(object):
         with destination.open('w') as f:
             csv_out = csv.writer(f, lineterminator='\n')
             csv_out.writerow(['id','label'])
-            for i, row in enumerate(submission_predictions):
+            for i, row in zip(test_ids, submission_predictions):
                 csv_out.writerow([i, row])
 
         logger.info(f'Submission stored at {project.as_relative(destination)}')
