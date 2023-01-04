@@ -160,7 +160,7 @@ class FinalClassifier(object):
         destination = project.get_new_submission_file()
         with destination.open('w') as f:
             csv_out = csv.writer(f, lineterminator='\n')
-            csv_out.writerow(['id','label'])
+            csv_out.writerow(['id','prediction'])
             for i, row in zip(test_ids, submission_predictions):
                 csv_out.writerow([i, row])
 
