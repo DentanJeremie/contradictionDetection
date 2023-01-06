@@ -1,6 +1,5 @@
 import sys
+from pathlib import Path
 
-from utils.pathtools import project
-
-if project.root not in sys.path:
-    sys.path.append(project.root)
+if str(Path(__file__).parent.parent.parent) not in sys.path:
+    sys.path.append(str(Path(__file__).parent.parent.parent))
