@@ -1,2 +1,4 @@
 *
 !.gitignore
+!public_full.log
+!public_summary.log

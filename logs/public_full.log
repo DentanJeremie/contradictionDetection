@@ -1,0 +1,102 @@
+
+NEW LOG AT 03/01/2023 16:25:38
+        2630ms DEBUG [__init__.py] matplotlib data path: /users/eleves-b/2019/jeremie.dentan/miniconda3/envs/contradict/lib/python3.8/site-packages/matplotlib/mpl-data
+        2633ms DEBUG [__init__.py] CONFIGDIR=/users/eleves-b/2019/jeremie.dentan/.config/matplotlib
+        2634ms DEBUG [__init__.py] interactive is False
+        2634ms DEBUG [__init__.py] platform is linux
+        2687ms DEBUG [__init__.py] CACHEDIR=/users/eleves-b/2019/jeremie.dentan/.cache/matplotlib
+        2688ms DEBUG [font_manager.py] Using fontManager instance from /users/eleves-b/2019/jeremie.dentan/.cache/matplotlib/fontlist-v330.json
+        2921ms DEBUG [bert.py] Initiating a BERT classifier...
+        2926ms DEBUG [connectionpool.py] Starting new HTTPS connection (1): huggingface.co:443
+        3268ms DEBUG [connectionpool.py] https://huggingface.co:443 "HEAD /bert-base-multilingual-cased/resolve/main/tokenizer_config.json HTTP/1.1" 200 0
+        3394ms DEBUG [connectionpool.py] Starting new HTTPS connection (1): huggingface.co:443
+        3728ms DEBUG [connectionpool.py] https://huggingface.co:443 "HEAD /bert-base-multilingual-cased/resolve/main/config.json HTTP/1.1" 200 0
+        4898ms INFO  [bert.py] No existing trained model specified
+        4898ms INFO  [bert.py] Tokenizing train set...
+        6415ms INFO  [bert.py] Tokenizing test set...
+        6461ms INFO  [bert.py] Tokenizing submission set...
+        7230ms INFO  [bert.py] Tokenizing full train set...
+        8868ms INFO  [bert.py] Datasets built !
+        8868ms INFO  [bert.py] Building BERT trainer...
+        9727ms INFO  [bert.py] Trainer built !
+        9727ms INFO  [bert.py] Starting training of the BERT classifier (40 epochs)
+     5412246ms INFO  [bert.py] Epoch 1.0: eval_accuracy: 0.604
+     5412247ms INFO  [bert.py] Epoch 1.0: eval_f1: 0.604
+     5412248ms INFO  [bert.py] Epoch 1.0: eval_loss: 0.911
+     5412248ms INFO  [bert.py] Epoch 1.0: eval_precision: 0.621
+     5412248ms INFO  [bert.py] Epoch 1.0: eval_recall: 0.604
+     5412248ms INFO  [bert.py] Epoch 2.0: eval_accuracy: 0.604
+     5412248ms INFO  [bert.py] Epoch 2.0: eval_f1: 0.606
+     5412248ms INFO  [bert.py] Epoch 2.0: eval_loss: 0.936
+     5412248ms INFO  [bert.py] Epoch 2.0: eval_precision: 0.616
+     5412248ms INFO  [bert.py] Epoch 2.0: eval_recall: 0.604
+     5412248ms INFO  [bert.py] Epoch 3.0: eval_accuracy: 0.615
+     5412248ms INFO  [bert.py] Epoch 3.0: eval_f1: 0.614
+     5412248ms INFO  [bert.py] Epoch 3.0: eval_loss: 0.873
+     5412248ms INFO  [bert.py] Epoch 3.0: eval_precision: 0.614
+     5412248ms INFO  [bert.py] Epoch 3.0: eval_recall: 0.615
+     5412248ms INFO  [bert.py] Epoch 4.0: eval_accuracy: 0.596
+     5412248ms INFO  [bert.py] Epoch 4.0: eval_f1: 0.597
+     5412248ms INFO  [bert.py] Epoch 4.0: eval_loss: 1.133
+     5412248ms INFO  [bert.py] Epoch 4.0: eval_precision: 0.608
+     5412248ms INFO  [bert.py] Epoch 4.0: eval_recall: 0.596
+     5412248ms INFO  [bert.py] Epoch 5.0: eval_accuracy: 0.596
+     5412248ms INFO  [bert.py] Epoch 5.0: eval_f1: 0.591
+     5412248ms INFO  [bert.py] Epoch 5.0: eval_loss: 1.554
+     5412248ms INFO  [bert.py] Epoch 5.0: eval_precision: 0.594
+     5412248ms INFO  [bert.py] Epoch 5.0: eval_recall: 0.596
+     5412248ms INFO  [bert.py] Epoch 6.0: eval_accuracy: 0.615
+     5412248ms INFO  [bert.py] Epoch 6.0: eval_f1: 0.612
+     5412248ms INFO  [bert.py] Epoch 6.0: eval_loss: 1.708
+     5412248ms INFO  [bert.py] Epoch 6.0: eval_precision: 0.614
+     5412248ms INFO  [bert.py] Epoch 6.0: eval_recall: 0.615
+     5412248ms INFO  [bert.py] Epoch 7.0: eval_accuracy: 0.577
+     5412248ms INFO  [bert.py] Epoch 7.0: eval_f1: 0.578
+     5412248ms INFO  [bert.py] Epoch 7.0: eval_loss: 1.998
+     5412249ms INFO  [bert.py] Epoch 7.0: eval_precision: 0.600
+     5412249ms INFO  [bert.py] Epoch 7.0: eval_recall: 0.577
+     5412249ms INFO  [bert.py] Epoch 8.0: eval_accuracy: 0.599
+     5412249ms INFO  [bert.py] Epoch 8.0: eval_f1: 0.595
+     5412249ms INFO  [bert.py] Epoch 8.0: eval_loss: 1.780
+     5412249ms INFO  [bert.py] Epoch 8.0: eval_precision: 0.595
+     5412249ms INFO  [bert.py] Epoch 8.0: eval_recall: 0.599
+     5412249ms INFO  [bert.py] Training metrics: train_runtime: 5402.370
+     5412249ms INFO  [bert.py] Training metrics: train_samples_per_second: 87.043
+     5412249ms INFO  [bert.py] Training: done !
+     5418911ms INFO  [bert.py] Best model stored at /users/eleves-b/2019/jeremie.dentan/contradictionDetection/output/bert_checkpoints/checkpoint2023-01-03-16-25-38/best
+     5418911ms INFO  [bert.py] Predicting features for the full train set...
+     5651105ms INFO  [bert.py] Full training preds.: accuracy: 0.855
+     5651105ms INFO  [bert.py] Full training preds.: precision: 0.855
+     5651106ms INFO  [bert.py] Full training preds.: recall: 0.855
+     5651106ms INFO  [bert.py] Full training preds.: f1: 0.855
+     5651106ms INFO  [bert.py] Predicting features for the submission set...
+     5736737ms INFO  [bert.py] Predictions: done!
+
+NEW LOG AT 04/01/2023 15:26:31
+         718ms DEBUG [__init__.py] matplotlib data path: /Users/jeremie/miniconda3/envs/contradict/lib/python3.8/site-packages/matplotlib/mpl-data
+         722ms DEBUG [__init__.py] CONFIGDIR=/Users/jeremie/.matplotlib
+         723ms DEBUG [__init__.py] interactive is False
+         723ms DEBUG [__init__.py] platform is darwin
+         773ms DEBUG [__init__.py] CACHEDIR=/Users/jeremie/.matplotlib
+         775ms DEBUG [font_manager.py] Using fontManager instance from /Users/jeremie/.matplotlib/fontlist-v330.json
+         988ms INFO  [xgb.py] Loading high-level features
+         988ms DEBUG [xgb.py] Loading features for bert...
+        1007ms DEBUG [xgb.py] Loading features for cosine-distiluse-base...
+        1017ms DEBUG [xgb.py] Loading features for cosine-paraphrase-MiniLM...
+        1026ms DEBUG [xgb.py] Loading features for cosine-paraphrase-mpnet...
+        1035ms DEBUG [xgb.py] Loading features for antonyms-distiluse-base...
+        1052ms DEBUG [xgb.py] Loading features for antonyms-paraphrase-MiniLM...
+        1068ms DEBUG [xgb.py] Loading features for antonyms-paraphrase-mpnet...
+        1083ms INFO  [xgb.py] Concatenating loaded high-level features
+        1133ms INFO  [xgb.py] 12120
+        1134ms INFO  [xgb.py] Splitting into train and test set
+        1138ms INFO  [xgb.py] Starting XGB tuning
+        1151ms INFO  [xgb.py] All features have been loaded, the classifier is initialized.
+        1151ms INFO  [xgb.py] Training XGBoost classifier
+        1395ms INFO  [xgb.py] Evaluating the model
+        1399ms INFO  [xgb.py] XGBoost evaluation: accuracy: 0.9065934065934066
+        1399ms INFO  [xgb.py] XGBoost evaluation: recall: 0.9065934065934066
+        1399ms INFO  [xgb.py] XGBoost evaluation: precision: 0.908186434392893
+        1399ms INFO  [xgb.py] XGBoost evaluation: f1: 0.9066140089454343
+        1399ms INFO  [xgb.py] Computing predictions for the submission
+        1411ms INFO  [xgb.py] Submission stored at /output/submissions/submission_features_2023_0104__15_26_32.csv

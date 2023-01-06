@@ -26,9 +26,8 @@ class CosineSimilarityFeature():
         train_labels: t.List[int],
         submission_sentences_1: t.List[str],
         submission_sentences_2: t.List[str],
+        model_name: str,
         *,
-        output_dir: Path = project.get_new_bert_chepoint(),
-        model_name: str = 'paraphrase-multilingual-mpnet-base-v2',
         model_nickname: str = ''
     ) -> None:
 
@@ -51,7 +50,6 @@ class CosineSimilarityFeature():
         # Model
         self.model_name = model_name
         self.model_nickname = model_nickname
-        self.output_dir = output_dir
         self.model = SentenceTransformer(self.model_name)
 
         self._embedding_built = False
