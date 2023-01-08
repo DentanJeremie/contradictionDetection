@@ -38,9 +38,9 @@ XML_MAX_LENGTH = 512
 
 # XGBOOST
 XGB_PARAM_SEARCH = {
-    'max_depth': [2],
-    'learning_rate': [0.01],
-    'colsample_bytree': [0.3, 0.8]
+    'max_depth': [2, 3, 4],
+    'learning_rate': [0.01, 0.02, 0.05, 0.1, 0.2],
+    'colsample_bytree': [0.3, 0.2, 0.8]
 }
 XGB_DEFAULT_PARAM_TO_SEARCH = {
     'max_depth': 5,

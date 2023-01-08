@@ -21,7 +21,7 @@ class FinalClassifier(object):
 
         self.load_features()
         self.split_train_test(test_size)
-        self.init_classifier()
+        self.init_classifier(tune_xgb=True)
 
         logger.info('All features have been loaded, the classifier is initialized.')
     
